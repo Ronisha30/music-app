@@ -1,12 +1,14 @@
 const Pool = require('pg').Pool;
 
-const pool = new Pool({
-    user: 'postgres',
-    // host: 'localhost',
-    host: 'music.c7xclwu5il92.us-east-1.rds.amazonaws.com',
-    database: 'music',
-    password: 'postgres',
-    port: 5432
+ const pool = new Pool({
+//     user: 'postgres',
+//     host: 'localhost',
+//     // host: 'music.c7xclwu5il92.us-east-1.rds.amazonaws.com',
+//     database: 'music',
+//     password: ' password1',
+//     port: 5432
+        
+connectionString: process.env.PSQL_CONNECTION
 });
 
 const getAllSongs = (req, res) => {
@@ -20,10 +22,39 @@ const getAllSongs = (req, res) => {
 
 const addSong = (req, res) => {
     try {
-        const { song_name, artist, duration, play_count, track_listing } = req.body;
+        const { name, artistId, duration, play_count, img } = req.body;
         pool.query(
-            `INSERT INTO songs (song_name, artist, duration, play_count, track_listing) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [song_name, artist, duration, play_count, track_listing],
+            `INSERT INTO songs (name, artistId, duration, play_count, img) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [name, artistId , duration, play_count, img],
+            (error, results) => {
+                if (error) {
+                    console.log(error, '<--- error here')
+                    throw error;
+                }
+                console.log(results, "<--- result!")
+                res.status(200).json(results.rows)
+            }
+        );
+    } catch (e) {
+        console.log("ERROR CAUGHT! " + err.message)
+    }
+};
+
+const getAllArtists = (req, res) => {
+    pool.query('SELECT * FROM artists', (error, result) => {
+        if(error){
+            throw error;
+        }
+        res.status(200).json(result.rows);
+    })
+}
+
+const addArtist = (req, res) => {
+    try {
+        const {  name, age, img } = req.body;
+        pool.query(
+            `INSERT INTO artists (name, age, img) VALUES ($1, $2, $3) RETURNING *`,
+            [ name , age, img],
             (error, results) => {
                 if (error) {
                     console.log(error, '<--- error here')
@@ -51,7 +82,9 @@ const deleteSongById = (req, res) => {
 
 const updateSongNameById = (req, res) => {
     const { song_id } = req.params;
+    //Gives an array of all the keys on req.body
     const keys = Object.keys(req.body);
+    //Gives an array of all the values on req.body
     const values = Object.values(req.body);
 
     // Adding to our UPDATE sql statement
@@ -84,5 +117,8 @@ module.exports = {
     addSong,
     getAllSongs,
     deleteSongById,
-    updateSongNameById
+    updateSongNameById,
+    addArtist,
+    getAllArtists
+
 }

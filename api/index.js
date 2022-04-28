@@ -1,3 +1,4 @@
+require ('dotenv').config();
 const express = require('express');
 const app = express();
 const db = require('./queries.js');
@@ -13,11 +14,16 @@ app.get('/', (req, res) => {
 
 app.get('/songs', db.getAllSongs);
 
-app.post('/songs', db.addSong);
 
-app.delete('/songs/:song_id', db.deleteSongById);
+app.post('/songs', db.addSong);;
 
-app.put('/songs/:song_id', db.updateSongNameById);
+app.get('/artists', db.getAllArtists);
+
+app.post('/artists', db.addArtist);;
+
+app.delete('/songs/:name', db.deleteSongById);
+
+app.put('/songs/:name', db.updateSongNameById);
 
 app.listen(port, () => {
     console.log(`App running on ${port}...`)

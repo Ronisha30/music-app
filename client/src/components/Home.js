@@ -1,6 +1,9 @@
 import React from 'react';
 import AddSongs from './AddSong';
+import AddArtists from './Artist';
 import { getAllSongs } from './networkRequests';
+
+
 
 class Home extends React.Component {
     state = {
@@ -17,6 +20,7 @@ class Home extends React.Component {
         return (
             <div>
                 <AddSongs />
+                <AddArtists/>
                 <ul>
                     {this.state.songs.map(song => <li key={song.song_id}>{song.song_name}</li>)}
                 </ul>
