@@ -14,7 +14,7 @@ class AddArtists extends React.Component {
     }
 
     onClick = () => {
-        AddArtists(this.state);
+    addArtists(this.state);
     }
 
    render(){
