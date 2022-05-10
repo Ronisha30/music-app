@@ -1,88 +1,63 @@
-import React, { useState, useEffect } from "react";
-import { addSong, getAllArtists } from "./networkRequests";
+import React, { useState, useEffect } from 'react';
+import { addSong, getAllFromTable } from './networkRequests';
+
+export default function AddSong(props){
+    // internal memory for this component
+    const [state, setState] = useState({
+        name: "",
+        duration: "",
+        play_count: "",
+        img: ""
+     });
+
+     const [artists, setArtists] = useState([])
+     useEffect(() => {
+         getAllFromTable('artists')
+            .then(res => setArtists(res))
+     }, []);
 
 
-export default function AddSong(props) {
-  const [state, setState] = useState({
-    name: "",
-    artistId: "",
-    duration: "",
-    play_count: "",
-    img: "",
-  });
-  const [artists, setArtists]= useState([])
+    const handleChange = (e) => {
+        setState({...state, [e.target.name]: e.target.value });
+    }
 
-useEffect(() => {
-  getAllArtists().then (res => {
-      setArtists(res);
-  });
-},[])
+    const submitSong = () => {
+        addSong(state)
+            .then(refresh);
+    }
 
-console.log(artists)
-  
-const handleChange = (e) => {
-    setState({ ...state, [e.target.name]: e.target.value });
-}
+    const refresh = () => {
+        // $todo make this dyanmic isntead of statically resetting
 
-  const submitSong = () => {
-    console.log(state)
-    addSong(state)
-    .then(refresh);
-  };
-  const refresh = () => {
+        // after adding a song we want to make sure to clear the inputs so a user can add another song
+        setState({
+            name: "",
+            duration: "",
+            play_count: "",
+            img: ""
+        });
 
-    // Write a comment here
+        // props are attributes passed from parent components into child components
+        // after submitting a new song we need the users list of songs to update so they can see the new song
+        props.refresh();
+    }
 
-    // after adding a song we want to make sure to clear the inputs so a user can add another song
-    setState({
-    name: "",
-    artistid: "",
-    duration: "",
-    play_count: "",
-    img:""
-  });
-
-
-  
-    props.refresh();
-  }
-  
-      // Fetch request - getAllArtists in useEffect - reference the refresh function in Home.js (fetchAllSongs)
-    // set the artists array to a hook
-    // map over artists array and create an option for each artist object
-    // text = artist.name / value = artist.id
-  
-  
-  
-  return (
-    <div className="add-song-wrap">
-      <h1>Add Song!</h1>
-      {/* Need to use state because thats where the data is
+    return(
+        <div className="add-song-wrap">
+            <h1>Add Song!</h1>
+            <label>Artist: </label>
+            <select onChange={handleChange} name='artistId'>
+                {/* <option value='1' name='artistId'>Jay Z</option> */}
+                {artists.map(artist => <option key={artist.id} value={artist.id}>{artist.name}</option>)}
+            </select>
+           {/* Need to use state because thats where the data is
             Array.map*/
-      Object.keys(state).map(key => {
-                    if (key === 'artistId') {
-                        return (
-                            <>
-                                <label>Artist</label>
-                                <select onChange={handleChange} name='artistId' value={state.artistId}>
-                                    <option value=''></option>
-                                    {artists.map(artist => {
-                                        return <option value={artist.id}>{artist.name}</option>
-                                    })}
-                                </select>
-                            </>
-                        )
-                    } else {
-                        return (
-                            <>
-                                <label>{key}</label>
-                                <input onChange={handleChange} name={key} value={state[key]} />
-                            </>
-                        )
-                    }
-                })}
+            Object.keys(state).map(columnName => columnName !== 'artistId' && <div key={columnName}>
+                <label>{columnName}</label>
+                <input onChange={handleChange} name={columnName} value={state[columnName]}/>
+            </div>)}
+            
             <button onClick={submitSong}>Submit</button>
         </div>
     )
 }
-            
